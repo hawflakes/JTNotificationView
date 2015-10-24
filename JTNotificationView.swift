@@ -14,13 +14,16 @@ class JTNotificationView : UIView {
     var animationDuration = 0.3;
     
     var text :String!;
-    let notifHeight: CGFloat! = 70.0;
-    let fontSize: CGFloat! = 16.0;
+    let notifHeight: CGFloat! = 64.0;
+    let fontSize: CGFloat! = 14.0;
+    let iconWidth = 43.0;
     
     let imageView = UIImageView();
     let label = UILabel();
+    let labelTextNumberOfLines = 2;
     let closeButton = UIButton(type: .System);
-    
+   
+    var openAction: (()->Void)? = nil;
     
     override init(frame: CGRect) {
         super.init(frame: frame);
@@ -30,7 +33,7 @@ class JTNotificationView : UIView {
         super.init(coder: aDecoder);
     }
     
-    init(text:String!, icon:UIImage!) {
+    init(text:String!, icon:UIImage!, openAction:()->Void) {
         let frame = CGRectMake(0, -notifHeight, UIScreen.mainScreen().bounds.width, notifHeight);
         super.init(frame: frame);
         
@@ -41,16 +44,18 @@ class JTNotificationView : UIView {
         self.closeButton.setTitle(closeTitle, forState: .Normal);
         self.closeButton.setTitleColor(UIColor.whiteColor(), forState: .Normal);
         self.closeButton.setTitle(closeTitle, forState: .Highlighted);
-        self.closeButton.titleLabel!.font = UIFont.boldSystemFontOfSize(30.0);
+        self.closeButton.titleLabel!.font = UIFont.boldSystemFontOfSize(22.0);
+        self.closeButton.titleLabel!.sizeToFit();
         self.closeButton.translatesAutoresizingMaskIntoConstraints = false;
+        self.closeButton.addTarget(self, action: "dismiss", forControlEvents: .TouchUpInside);
         
         self.imageView.image = icon;
-        self.imageView.backgroundColor = UIColor.yellowColor();
-        self.imageView.contentMode = .ScaleAspectFit;
         self.imageView.translatesAutoresizingMaskIntoConstraints = false;
-       
-        self.label.numberOfLines = 2;
-        self.label.font = UIFont.boldSystemFontOfSize(fontSize);
+        
+      
+        self.label.adjustsFontSizeToFitWidth = true;
+        self.label.numberOfLines = labelTextNumberOfLines;
+        self.label.font = UIFont.systemFontOfSize(fontSize);
         self.label.textColor = UIColor.whiteColor();
         self.label.text = text;
         self.label.sizeToFit();
@@ -60,9 +65,11 @@ class JTNotificationView : UIView {
         self.addSubview(self.label);
         self.addSubview(self.closeButton);
         
+        self.openAction = openAction;
+        
         
         self.userInteractionEnabled = true;
-        let tapRecognizer = UITapGestureRecognizer(target: self, action: "dismiss");
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: "runOpenAction");
         self.addGestureRecognizer(tapRecognizer);
         
         backgroundColor = UIColor(white: 0.0, alpha: 0.75);
@@ -79,13 +86,15 @@ class JTNotificationView : UIView {
             "textLabel": self.label];
         
         let metrics = ["padding": 20.0,
-                        "iconWidth": 40.0,
-                        "vPadding":15.0];
+                        "iconWidth": iconWidth,
+                        "vPadding":3.0,
+                        "closeWidth":25.0
+        ];
         
         let vLayout = NSLayoutConstraint.constraintsWithVisualFormat("V:|-vPadding-[textLabel]-vPadding-|", options: .AlignAllCenterX, metrics: metrics, views: views);
         self.addConstraints(vLayout);
         
-        let layout = NSLayoutConstraint.constraintsWithVisualFormat("|-(padding)-[icon(iconWidth)]-[textLabel]-[button]-(padding)-|", options: .AlignAllCenterY, metrics: metrics, views: views);
+        let layout = NSLayoutConstraint.constraintsWithVisualFormat("|-(padding)-[icon(iconWidth)]-[textLabel]-[button(closeWidth)]-(padding)-|", options: .AlignAllCenterY, metrics: metrics, views: views);
         self.addConstraints(layout);
         
         super.updateConstraints();
@@ -107,7 +116,7 @@ class JTNotificationView : UIView {
         }
         
     }
-   
+    
     func dismiss() {
         self.dismiss(true);
     }
@@ -132,6 +141,13 @@ class JTNotificationView : UIView {
             completion();
         }
         
+    }
+    
+    func runOpenAction() {
+        if let openAction = self.openAction {
+            openAction();
+        }
+        self.dismiss(true);
     }
     
     class func setupNotificationWindow() {
