@@ -10,11 +10,14 @@ import Foundation
 import UIKit
 
 class JTNotificationView : UIView {
-    static let notificationWindow = UIWindow(frame: UIScreen.mainScreen().bounds);
+    static let notificationWindow = JTOverlayWindow(frame: UIScreen.mainScreen().bounds);
+    static var passThroughView: JTPassThroughView?;
+    static var presentingErrors: [JTNotificationView] = [];
+    
     var animationDuration = 0.3;
     
     var text :String!;
-    let notifHeight: CGFloat! = 64.0;
+    let notifHeight: CGFloat! = 64.0 + 20;
     let fontSize: CGFloat! = 14.0;
     let iconWidth = 43.0;
     
@@ -88,10 +91,12 @@ class JTNotificationView : UIView {
         let metrics = ["padding": 20.0,
                         "iconWidth": iconWidth,
                         "vPadding":3.0,
-                        "closeWidth":25.0
+                        "closeWidth":25.0,
+                        "statusBarHeight": 20.0,
         ];
         
-        let vLayout = NSLayoutConstraint.constraintsWithVisualFormat("V:|-vPadding-[textLabel]-vPadding-|", options: .AlignAllCenterX, metrics: metrics, views: views);
+        
+        let vLayout = NSLayoutConstraint.constraintsWithVisualFormat("V:|-statusBarHeight-[textLabel]-vPadding-|", options: .AlignAllCenterX, metrics: metrics, views: views);
         self.addConstraints(vLayout);
         
         let layout = NSLayoutConstraint.constraintsWithVisualFormat("|-(padding)-[icon(iconWidth)]-[textLabel]-[button(closeWidth)]-(padding)-|", options: .AlignAllCenterY, metrics: metrics, views: views);
@@ -103,8 +108,21 @@ class JTNotificationView : UIView {
     var token: dispatch_once_t = 0
 
     func show(animated:Bool) {
+    
+        if JTNotificationView.passThroughView == nil {
+            // add the pass-through view
+            let passThrough = JTPassThroughView(frame: UIScreen.mainScreen().bounds);
+            passThrough.hidden = false;
+            passThrough.autoresizingMask = [.FlexibleWidth, .FlexibleHeight];
+            
+            JTNotificationView.passThroughView = passThrough;
+            JTNotificationView.notificationWindow.addSubview(passThrough);
+        }
         JTNotificationView.notificationWindow.hidden = false;
-        JTNotificationView.notificationWindow.makeKeyAndVisible();
+        
+        //add self to visible errors
+        JTNotificationView.presentingErrors.append(self);
+        
         JTNotificationView.notificationWindow.addSubview(self);
         
         if animated {
@@ -123,15 +141,22 @@ class JTNotificationView : UIView {
     
     func dismiss(animated:Bool = true) {
         print("dismiss");
+
         
         func completion() {
             self.removeFromSuperview();
             JTNotificationView.notificationWindow.resignKeyWindow();
-            JTNotificationView.notificationWindow.hidden = true;
-            JTNotificationView.notificationWindow.rootViewController = nil;
+//            JTNotificationView.notificationWindow.hidden = true;
+//            JTNotificationView.notificationWindow.rootViewController = nil;
+            
+            //only remove from presenting errors at the end. otherwise we might disappear too soon
+            var newErrors = JTNotificationView.presentingErrors
+            if let index = newErrors.indexOf(self) {
+                newErrors.removeAtIndex(index);
+                JTNotificationView.presentingErrors = newErrors;
+            }
         }
         if animated{
-            
             UIView.animateWithDuration(animationDuration, animations: { () -> Void in
                 self.frame.origin.y = -self.notifHeight;
                 }, completion: { (Bool) -> Void in
@@ -155,4 +180,30 @@ class JTNotificationView : UIView {
         notificationWindow.windowLevel = UIWindowLevelStatusBar;
         notificationWindow.backgroundColor = UIColor(red: 1.0, green: 0, blue: 0, alpha: 0.8);
     }
+    
+    class func dismissTopError(animated:Bool) {
+        if self.presentingErrors.count > 0 {
+            if let topError = self.presentingErrors.last {
+                topError.dismiss(animated);
+            }
+        }
+    }
+}
+
+internal class JTOverlayWindow : UIWindow {
+    
+    override func hitTest(point: CGPoint, withEvent event: UIEvent?) -> UIView? {
+        let result = super.hitTest(point, withEvent: event);
+        if let _ = result as? JTPassThroughView {
+            // NOTE(tihon) 2015-10-25: call the manager to dismiss
+            print("passthrough view");
+            JTNotificationView.dismissTopError(true);
+            return nil;
+        }
+        return result;
+    }
+}
+
+internal class JTPassThroughView : UIView {
+    
 }

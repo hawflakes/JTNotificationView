@@ -69,7 +69,7 @@ class ViewController: UIViewController {
 
     func presentNotification() {
         print("present notifcation");
-        let image = ViewController.imageFromText("&",font:UIFont.systemFontOfSize(60), maxWidth: 40.0, color: UIColor.blueColor());
+        let image = ViewController.imageFromText("🐼",font:UIFont.systemFontOfSize(60), maxWidth: 40.0, color: UIColor.blueColor());
         let notif = JTNotificationView(text: "Steve Holm Assigned the lead Brian Crushing to you.", icon:image) {
             print("done.");
         };
