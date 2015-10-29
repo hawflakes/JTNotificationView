@@ -31,9 +31,11 @@ class ViewController: UIViewController {
     }
     
     override func viewWillAppear(animated: Bool) {
+        JTNotificationViewController.setupWindow();
         self.view.addSubview(button);
+        self.view.backgroundColor = UIColor.blueColor();
  
-        button.backgroundColor = UIColor.greenColor();
+        button.backgroundColor = UIColor.grayColor();
         button.setTitle("Show Notification", forState: .Normal);
         button.setTitleColor(UIColor.blackColor(), forState: .Highlighted);
        

@@ -9,13 +9,102 @@
 import Foundation
 import UIKit
 
-class JTNotificationView : UIView {
-    static let notificationWindow = JTOverlayWindow(frame: UIScreen.mainScreen().bounds);
+class JTNotificationViewController : UIViewController {
     static var passThroughView: JTPassThroughView?;
     static var presentingErrors: [JTNotificationView] = [];
+    static var notificationController = JTNotificationViewController();
+    static let notificationWindow = JTOverlayWindow(frame: UIScreen.mainScreen().bounds);
     
     var animationDuration = 0.3;
     
+    override func preferredStatusBarStyle() -> UIStatusBarStyle {
+        return .LightContent;
+    }
+    
+    class func setupWindow() {
+        //        notificationWindow.windowLevel = UIWindowLevelStatusBar+2; //ensure we're above
+        notificationWindow.windowLevel = UIWindowLevelStatusBar;
+//        notificationWindow.backgroundColor = UIColor(red: 1.0, green: 0, blue: 0, alpha: 0.8);
+        notificationWindow.rootViewController = notificationController;
+    }
+    
+    class func teardownWindow() {
+        notificationWindow.resignKeyWindow();
+//        notificationWindow.hidden = true;
+        notificationWindow.rootViewController = nil;
+    }
+    
+    func show(notification:JTNotificationView, animated:Bool) -> Void {
+        if JTNotificationViewController.passThroughView == nil {
+            // add the pass-through view
+            let passThrough = JTPassThroughView(frame: UIScreen.mainScreen().bounds);
+            passThrough.hidden = false;
+            passThrough.autoresizingMask = [.FlexibleWidth, .FlexibleHeight];
+            
+            JTNotificationViewController.passThroughView = passThrough;
+            JTNotificationViewController.notificationWindow.addSubview(passThrough);
+        }
+        JTNotificationViewController.notificationWindow.hidden = false;
+        
+        //add self to visible errors
+        JTNotificationViewController.presentingErrors.append(notification);
+        
+        JTNotificationViewController.notificationWindow.addSubview(notification);
+        
+        let animationBlock = { () -> Void in
+            notification.frame.origin.y = 0
+        };
+        
+        // NOTE(tihon) 2015-10-29: work-around Swift compiler bug where it can't infer the type of the closure.
+        let completionBlock: (Bool) -> Void = { (Bool) -> Void in
+            self.setNeedsStatusBarAppearanceUpdate();
+        };
+        
+        if animated {
+            UIView.animateWithDuration(animationDuration, animations:animationBlock, completion:completionBlock);
+        } else {
+            animationBlock();
+            completionBlock(true);
+        }
+    }
+    
+    
+    func dismiss(notification:JTNotificationView, animated:Bool = true) {
+        // check if presenting it. if so, go through this. otherwise just remove from the queue
+        
+        print("dismiss");
+        func completion() {
+            notification.removeFromSuperview();
+            JTNotificationViewController.teardownWindow();
+            
+            //only remove from presenting errors at the end. otherwise we might disappear too soon
+            var newErrors = JTNotificationViewController.presentingErrors
+            if let index = newErrors.indexOf(notification) {
+                newErrors.removeAtIndex(index);
+                JTNotificationViewController.presentingErrors = newErrors;
+            }
+        }
+        if animated{
+            UIView.animateWithDuration(animationDuration, animations: { () -> Void in
+                notification.frame.origin.y = -notification.notifHeight;
+                }, completion: { (Bool) -> Void in
+                    completion();
+            });
+        } else {
+            completion();
+        }
+    }
+    
+    func dismissTopError(animated:Bool) {
+        if JTNotificationViewController.presentingErrors.count > 0 {
+            if let topError = JTNotificationViewController.presentingErrors.last {
+                topError.dismiss(animated);
+            }
+        }
+    }
+}
+
+class JTNotificationView : UIView {
     var text :String!;
     let notifHeight: CGFloat! = 64.0 + 20;
     let fontSize: CGFloat! = 14.0;
@@ -108,31 +197,7 @@ class JTNotificationView : UIView {
     var token: dispatch_once_t = 0
 
     func show(animated:Bool) {
-    
-        if JTNotificationView.passThroughView == nil {
-            // add the pass-through view
-            let passThrough = JTPassThroughView(frame: UIScreen.mainScreen().bounds);
-            passThrough.hidden = false;
-            passThrough.autoresizingMask = [.FlexibleWidth, .FlexibleHeight];
-            
-            JTNotificationView.passThroughView = passThrough;
-            JTNotificationView.notificationWindow.addSubview(passThrough);
-        }
-        JTNotificationView.notificationWindow.hidden = false;
-        
-        //add self to visible errors
-        JTNotificationView.presentingErrors.append(self);
-        
-        JTNotificationView.notificationWindow.addSubview(self);
-        
-        if animated {
-            UIView.animateWithDuration(animationDuration) { () -> Void in
-                self.frame.origin.y = 0;
-            }
-        } else {
-            self.frame.origin.y = 0;
-        }
-        
+        JTNotificationViewController.notificationController.show(self, animated: animated);
     }
     
     func dismiss() {
@@ -140,32 +205,8 @@ class JTNotificationView : UIView {
     }
     
     func dismiss(animated:Bool = true) {
+        JTNotificationViewController.notificationController.dismiss(self, animated:animated);
         print("dismiss");
-
-        
-        func completion() {
-            self.removeFromSuperview();
-            JTNotificationView.notificationWindow.resignKeyWindow();
-//            JTNotificationView.notificationWindow.hidden = true;
-//            JTNotificationView.notificationWindow.rootViewController = nil;
-            
-            //only remove from presenting errors at the end. otherwise we might disappear too soon
-            var newErrors = JTNotificationView.presentingErrors
-            if let index = newErrors.indexOf(self) {
-                newErrors.removeAtIndex(index);
-                JTNotificationView.presentingErrors = newErrors;
-            }
-        }
-        if animated{
-            UIView.animateWithDuration(animationDuration, animations: { () -> Void in
-                self.frame.origin.y = -self.notifHeight;
-                }, completion: { (Bool) -> Void in
-                    completion();
-            });
-        } else {
-            completion();
-        }
-        
     }
     
     func runOpenAction() {
@@ -175,19 +216,6 @@ class JTNotificationView : UIView {
         self.dismiss(true);
     }
     
-    class func setupNotificationWindow() {
-//        notificationWindow.windowLevel = UIWindowLevelStatusBar+2; //ensure we're above
-        notificationWindow.windowLevel = UIWindowLevelStatusBar;
-        notificationWindow.backgroundColor = UIColor(red: 1.0, green: 0, blue: 0, alpha: 0.8);
-    }
-    
-    class func dismissTopError(animated:Bool) {
-        if self.presentingErrors.count > 0 {
-            if let topError = self.presentingErrors.last {
-                topError.dismiss(animated);
-            }
-        }
-    }
 }
 
 internal class JTOverlayWindow : UIWindow {
@@ -197,7 +225,7 @@ internal class JTOverlayWindow : UIWindow {
         if let _ = result as? JTPassThroughView {
             // NOTE(tihon) 2015-10-25: call the manager to dismiss
             print("passthrough view");
-            JTNotificationView.dismissTopError(true);
+//            JTNotificationViewController.notificationController.dismissTopError(true);
             return nil;
         }
         return result;
