@@ -8,9 +8,11 @@
 
 import UIKit
 
+let notificationManager = JTNotificationManager();
+
 class ViewController: UIViewController {
     let button = UIButton();
-    
+    var count = 0;
     // NOTE(tihon) 2015-10-22: This window is used to present notifications and alerts.
 
     override func viewDidLoad() {
@@ -29,9 +31,13 @@ class ViewController: UIViewController {
         
         button.addTarget(self, action: "presentNotification", forControlEvents: .TouchUpInside);
     }
+   
+    override func preferredStatusBarStyle() -> UIStatusBarStyle {
+        return .Default;
+    }
     
     override func viewWillAppear(animated: Bool) {
-        JTNotificationViewController.setupWindow();
+        notificationManager.setupWindow();
         self.view.addSubview(button);
         self.view.backgroundColor = UIColor.blueColor();
  
@@ -70,15 +76,15 @@ class ViewController: UIViewController {
 
 
     func presentNotification() {
+
         print("present notifcation");
         let image = ViewController.imageFromText("🐼",font:UIFont.systemFontOfSize(60), maxWidth: 40.0, color: UIColor.blueColor());
-        let notif = JTNotificationView(text: "Steve Holm Assigned the lead Brian Crushing to you.", icon:image) {
+        let notif = JTNotificationView(text: "Steve Holm Assigned the lead Brian Crushing to you.\(count++)", icon:image) {
             print("done.");
         };
-        notif.show(true);
+        notificationManager.show(notif, animated: true);
     }
    
-    
     class func sizeOfAttributeString(str: NSAttributedString, maxWidth: CGFloat) -> CGSize {
         let size = str.boundingRectWithSize(CGSizeMake(maxWidth, 1000), options:(NSStringDrawingOptions.UsesLineFragmentOrigin), context:nil).size
         return size

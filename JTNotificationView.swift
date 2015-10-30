@@ -9,11 +9,72 @@
 import Foundation
 import UIKit
 
+//MARK: JTNotificationManager class to manage presentation of toasts, notifications, and modals
+class JTNotificationManager {
+    var presentedNotification: JTNotificationView? = nil; // the one currently showing
+    var notificationQueue: [JTNotificationView] = []; //items to present
+    let notificationController = JTNotificationViewController();
+    
+    func setupWindow() {
+        notificationController.setupWindow();
+    }
+    
+    
+    func show(notification: JTNotificationView,  animated: Bool = true) {
+        if (presentedNotification != nil) {
+            notificationQueue.append(notification);
+        } else {
+            presentedNotification = notification;
+            notification.notificationManager = self; //NOTE:(tihon) 2015-10-29 maybe this should be in the controller?
+            notificationController.show(notification, animated: animated);
+        }
+        
+    }
+    
+    func dismiss(notification: JTNotificationView, animated: Bool = true) {
+        //if presenting, tear it down. then present the next one in the queue.
+        if notification == presentedNotification {
+            notificationController.dismiss(notification, animated: animated);
+            presentedNotification = nil;
+        } else if let index = notificationQueue.indexOf(notification) {
+            notificationQueue.removeAtIndex(index);
+            print ("removed notification from queue");
+        } else {
+            print ("notification not in queue!");
+        }
+        //now handle any other pending ones...
+        processNextNotification(animated);
+    }
+    
+    func dismissAll(animated: Bool = true) {
+        if let notification = presentedNotification {
+            notificationController.dismiss(notification, animated: animated);
+            presentedNotification = nil;
+        }
+        notificationQueue.removeAll();
+        print ("removed all pending notifications");
+    }
+    
+    //checks for pending notifications and presents the next one in the queue
+    internal func processNextNotification(animated: Bool) {
+        if (presentedNotification != nil) {
+            // don't do anything
+            return;
+        } else if (notificationQueue.count > 0) {
+            // pop the top notif and present it
+            let topNotification = notificationQueue.removeFirst();
+            self.show(topNotification, animated: animated);
+        } else {
+            print ("nothing to show.");
+        }
+    }
+}
+
+
+// This class is only responsible for presenting itself. It is not responsible for dealing with multiple presentations
 class JTNotificationViewController : UIViewController {
-    static var passThroughView: JTPassThroughView?;
-    static var presentingErrors: [JTNotificationView] = [];
-    static var notificationController = JTNotificationViewController();
-    static let notificationWindow = JTOverlayWindow(frame: UIScreen.mainScreen().bounds);
+    var passThroughView: JTPassThroughView?;
+    let notificationWindow = JTOverlayWindow(frame: UIScreen.mainScreen().bounds);
     
     var animationDuration = 0.3;
     
@@ -21,35 +82,36 @@ class JTNotificationViewController : UIViewController {
         return .LightContent;
     }
     
-    class func setupWindow() {
-        //        notificationWindow.windowLevel = UIWindowLevelStatusBar+2; //ensure we're above
+    func setupWindow() {
         notificationWindow.windowLevel = UIWindowLevelStatusBar;
-//        notificationWindow.backgroundColor = UIColor(red: 1.0, green: 0, blue: 0, alpha: 0.8);
-        notificationWindow.rootViewController = notificationController;
+        notificationWindow.rootViewController = self;
     }
     
-    class func teardownWindow() {
+    func teardownWindow() {
         notificationWindow.resignKeyWindow();
-//        notificationWindow.hidden = true;
         notificationWindow.rootViewController = nil;
+        //send an update to the parent view controller...
+        if let topRootViewController = UIApplication.sharedApplication().keyWindow?.rootViewController {
+            topRootViewController.setNeedsStatusBarAppearanceUpdate();
+        }
     }
     
     func show(notification:JTNotificationView, animated:Bool) -> Void {
-        if JTNotificationViewController.passThroughView == nil {
+        if passThroughView == nil {
             // add the pass-through view
             let passThrough = JTPassThroughView(frame: UIScreen.mainScreen().bounds);
             passThrough.hidden = false;
             passThrough.autoresizingMask = [.FlexibleWidth, .FlexibleHeight];
             
-            JTNotificationViewController.passThroughView = passThrough;
-            JTNotificationViewController.notificationWindow.addSubview(passThrough);
+            passThroughView = passThrough;
+            notificationWindow.addSubview(passThrough);
         }
-        JTNotificationViewController.notificationWindow.hidden = false;
+        notificationWindow.hidden = false;
         
         //add self to visible errors
-        JTNotificationViewController.presentingErrors.append(notification);
         
-        JTNotificationViewController.notificationWindow.addSubview(notification);
+        notificationWindow.addSubview(notification);
+        
         
         let animationBlock = { () -> Void in
             notification.frame.origin.y = 0
@@ -57,11 +119,14 @@ class JTNotificationViewController : UIViewController {
         
         // NOTE(tihon) 2015-10-29: work-around Swift compiler bug where it can't infer the type of the closure.
         let completionBlock: (Bool) -> Void = { (Bool) -> Void in
-            self.setNeedsStatusBarAppearanceUpdate();
         };
         
         if animated {
-            UIView.animateWithDuration(animationDuration, animations:animationBlock, completion:completionBlock);
+            UIView.animateWithDuration(animationDuration, animations:{ () -> Void in
+                animationBlock();
+                self.setNeedsStatusBarAppearanceUpdate();
+                },
+                completion:completionBlock);
         } else {
             animationBlock();
             completionBlock(true);
@@ -75,14 +140,7 @@ class JTNotificationViewController : UIViewController {
         print("dismiss");
         func completion() {
             notification.removeFromSuperview();
-            JTNotificationViewController.teardownWindow();
-            
-            //only remove from presenting errors at the end. otherwise we might disappear too soon
-            var newErrors = JTNotificationViewController.presentingErrors
-            if let index = newErrors.indexOf(notification) {
-                newErrors.removeAtIndex(index);
-                JTNotificationViewController.presentingErrors = newErrors;
-            }
+            teardownWindow();
         }
         if animated{
             UIView.animateWithDuration(animationDuration, animations: { () -> Void in
@@ -92,14 +150,6 @@ class JTNotificationViewController : UIViewController {
             });
         } else {
             completion();
-        }
-    }
-    
-    func dismissTopError(animated:Bool) {
-        if JTNotificationViewController.presentingErrors.count > 0 {
-            if let topError = JTNotificationViewController.presentingErrors.last {
-                topError.dismiss(animated);
-            }
         }
     }
 }
@@ -114,6 +164,7 @@ class JTNotificationView : UIView {
     let label = UILabel();
     let labelTextNumberOfLines = 2;
     let closeButton = UIButton(type: .System);
+    weak var notificationManager: JTNotificationManager? = nil; //NOTE:(tihon) 2015-10-29 this must be set if presenting. This should conform to a protocol instead.
    
     var openAction: (()->Void)? = nil;
     
@@ -194,28 +245,18 @@ class JTNotificationView : UIView {
         super.updateConstraints();
     }
     
-    var token: dispatch_once_t = 0
-
-    func show(animated:Bool) {
-        JTNotificationViewController.notificationController.show(self, animated: animated);
-    }
-    
-    func dismiss() {
-        self.dismiss(true);
-    }
-    
-    func dismiss(animated:Bool = true) {
-        JTNotificationViewController.notificationController.dismiss(self, animated:animated);
-        print("dismiss");
-    }
-    
     func runOpenAction() {
         if let openAction = self.openAction {
             openAction();
         }
-        self.dismiss(true);
+        dismiss();
     }
-    
+   
+    internal func dismiss() {
+        if let manager = self.notificationManager {
+            manager.dismiss(self);
+        }
+    }
 }
 
 internal class JTOverlayWindow : UIWindow {
