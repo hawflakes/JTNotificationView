@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "JTNotificationView.swift"
-            timestampString = "467843301.751794"
+            timestampString = "467923398.916063"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "137"
-            endingLineNumber = "137"
+            startingLineNumber = "188"
+            endingLineNumber = "188"
             landmarkName = "init(text:icon:openAction:)"
             landmarkType = "5">
          </BreakpointContent>
@@ -34,16 +34,48 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "JTNotificationView.swift"
+            timestampString = "467923398.916063"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "82"
+            endingLineNumber = "82"
+            landmarkName = "preferredStatusBarStyle()"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "JTNotificationView.swift"
-            timestampString = "467843311.761298"
+            timestampString = "467923398.916063"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "60"
-            endingLineNumber = "60"
-            landmarkName = "show(_:animated:)"
+            startingLineNumber = "95"
+            endingLineNumber = "95"
+            landmarkName = "teardownWindow()"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "JTForegroundNotificationDemo/ViewController.swift"
+            timestampString = "467858342.605875"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "36"
+            endingLineNumber = "36"
+            landmarkName = "preferredStatusBarStyle()"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -54,13 +86,61 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "JTNotificationView.swift"
-            timestampString = "467843338.280323"
+            timestampString = "467923258.06326"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "21"
-            endingLineNumber = "21"
-            landmarkName = "preferredStatusBarStyle()"
+            startingLineNumber = "40"
+            endingLineNumber = "40"
+            landmarkName = "dismiss(_:animated:)"
             landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "JTNotificationView.swift"
+            timestampString = "467923323.021075"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "16"
+            endingLineNumber = "16"
+            landmarkName = "JTNotificationManager"
+            landmarkType = "3">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "JTForegroundNotificationDemo.JTNotificationManager.notificationController.getter : JTForegroundNotificationDemo.JTNotificationViewController"
+                  moduleName = "JTForegroundNotificationDemo"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/jtihon/work/JTForegroundNotificationDemo/JTNotificationView.swift"
+                  timestampString = "467923399.948327"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0"
+                  offsetFromSymbolStart = "12">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "JTForegroundNotificationDemo.JTNotificationManager.init (JTForegroundNotificationDemo.JTNotificationManager.Type)() -&gt; JTForegroundNotificationDemo.JTNotificationManager"
+                  moduleName = "JTForegroundNotificationDemo"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/jtihon/work/JTForegroundNotificationDemo/JTNotificationView.swift"
+                  timestampString = "467923399.948554"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "16"
+                  endingLineNumber = "16"
+                  offsetFromSymbolStart = "77">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

@@ -13,7 +13,7 @@ import UIKit
 class JTNotificationManager {
     var presentedNotification: JTNotificationView? = nil; // the one currently showing
     var notificationQueue: [JTNotificationView] = []; //items to present
-    let notificationController = JTNotificationViewController();
+    let notificationController = NotificiationViewController();
     
     func setupWindow() {
         notificationController.setupWindow();
@@ -72,9 +72,9 @@ class JTNotificationManager {
 
 
 // This class is only responsible for presenting itself. It is not responsible for dealing with multiple presentations
-class JTNotificationViewController : UIViewController {
-    var passThroughView: JTPassThroughView?;
-    let notificationWindow = JTOverlayWindow(frame: UIScreen.mainScreen().bounds);
+internal class NotificiationViewController : UIViewController {
+    var passThroughView: PassThroughView?;
+    let notificationWindow = OverlayWindow(frame: UIScreen.mainScreen().bounds);
     
     var animationDuration = 0.3;
     
@@ -99,7 +99,7 @@ class JTNotificationViewController : UIViewController {
     func show(notification:JTNotificationView, animated:Bool) -> Void {
         if passThroughView == nil {
             // add the pass-through view
-            let passThrough = JTPassThroughView(frame: UIScreen.mainScreen().bounds);
+            let passThrough = PassThroughView(frame: UIScreen.mainScreen().bounds);
             passThrough.hidden = false;
             passThrough.autoresizingMask = [.FlexibleWidth, .FlexibleHeight];
             
@@ -245,7 +245,7 @@ class JTNotificationView : UIView {
         super.updateConstraints();
     }
     
-    func runOpenAction() {
+    internal func runOpenAction() {
         if let openAction = self.openAction {
             openAction();
         }
@@ -259,20 +259,20 @@ class JTNotificationView : UIView {
     }
 }
 
-internal class JTOverlayWindow : UIWindow {
+internal class OverlayWindow : UIWindow {
     
     override func hitTest(point: CGPoint, withEvent event: UIEvent?) -> UIView? {
         let result = super.hitTest(point, withEvent: event);
-        if let _ = result as? JTPassThroughView {
+        if let _ = result as? PassThroughView {
             // NOTE(tihon) 2015-10-25: call the manager to dismiss
             print("passthrough view");
-//            JTNotificationViewController.notificationController.dismissTopError(true);
+//            NotificiationViewController.notificationController.dismissTopError(true);
             return nil;
         }
         return result;
     }
 }
 
-internal class JTPassThroughView : UIView {
+internal class PassThroughView : UIView {
     
 }
