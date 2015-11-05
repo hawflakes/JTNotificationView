@@ -11,7 +11,7 @@ import UIKit
 
 //MARK: JTNotificationManager class to manage presentation of toasts, notifications, and modals
 class JTNotificationManager {
-    var presentedNotification: JTNotificationView? = nil; // the one currently showing
+    weak var presentedNotification: JTNotificationView? = nil; // the one currently showing
     var notificationQueue: [JTNotificationView] = []; //items to present
     let notificationController = NotificiationViewController();
     
@@ -78,18 +78,15 @@ internal class NotificiationViewController : UIViewController {
     
     var animationDuration = 0.3;
     
-    override func preferredStatusBarStyle() -> UIStatusBarStyle {
-        return .LightContent;
-    }
-    
     func setupWindow() {
         notificationWindow.windowLevel = UIWindowLevelStatusBar;
         notificationWindow.rootViewController = self;
+        notificationWindow.hidden = true;
     }
     
     func teardownWindow() {
-        notificationWindow.resignKeyWindow();
         notificationWindow.rootViewController = nil;
+        notificationWindow.hidden = true;
         //send an update to the parent view controller...
         if let topRootViewController = UIApplication.sharedApplication().keyWindow?.rootViewController {
             topRootViewController.setNeedsStatusBarAppearanceUpdate();
@@ -97,6 +94,9 @@ internal class NotificiationViewController : UIViewController {
     }
     
     func show(notification:JTNotificationView, animated:Bool) -> Void {
+        self.view.hidden = true; //NOTE:(tihon) 2015-11-3 This HAX is here until we use the view itself as the passthrough.
+        // without hiding the view, you have to dismiss the notification the first time.
+        
         if passThroughView == nil {
             // add the pass-through view
             let passThrough = PassThroughView(frame: UIScreen.mainScreen().bounds);
@@ -152,17 +152,62 @@ internal class NotificiationViewController : UIViewController {
             completion();
         }
     }
+
+    class func topViewController() -> UIViewController? {
+        let keyWindow = UIApplication.sharedApplication().keyWindow;
+        return topViewControllerWithRoot(keyWindow?.rootViewController);
+    }
+    
+    // NOTE: (tihon) 2015-11-2: borrowed from `RaisinToast`
+    class func topViewControllerWithRoot(root:UIViewController?) -> UIViewController? {
+        if let navRoot = root as? UINavigationController {
+            return topViewControllerWithRoot(navRoot.visibleViewController);
+        } else if let root = root {
+            if (root.presentedViewController != nil) && !(root.presentedViewController != nil) {
+                return topViewControllerWithRoot(root.presentedViewController);
+            };
+        }
+        return root;
+    }
+    
+    override func preferredStatusBarStyle() -> UIStatusBarStyle {
+        //check that we're not showing anything right now
+        let presenting = self.view.subviews.contains{ (view) -> Bool in
+            if view.isKindOfClass(JTNotificationView) {
+                return true;
+            }
+            return false;
+        };
+        
+        if presenting {
+            return .LightContent; // we're onscreen, so show our own
+        }
+        
+        if let topVC = NotificiationViewController.topViewController() {
+            return topVC.preferredStatusBarStyle();
+        }
+        return .LightContent;
+    }
+    
+    override func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
+        if let topVC = NotificiationViewController.topViewController() {
+            return topVC.supportedInterfaceOrientations();
+        }
+        return super.supportedInterfaceOrientations();
+    }
+    
 }
 
+let statusBarHeight = 0.0;
 class JTNotificationView : UIView {
     var text :String!;
-    let notifHeight: CGFloat! = 64.0 + 20;
+    var notifHeight: CGFloat! = 64.0 + CGFloat(statusBarHeight);
     let fontSize: CGFloat! = 14.0;
     let iconWidth = 43.0;
     
     let imageView = UIImageView();
     let label = UILabel();
-    let labelTextNumberOfLines = 2;
+    let labelTextNumberOfLines = 0;
     let closeButton = UIButton(type: .System);
     weak var notificationManager: JTNotificationManager? = nil; //NOTE:(tihon) 2015-10-29 this must be set if presenting. This should conform to a protocol instead.
    
@@ -232,7 +277,7 @@ class JTNotificationView : UIView {
                         "iconWidth": iconWidth,
                         "vPadding":3.0,
                         "closeWidth":25.0,
-                        "statusBarHeight": 20.0,
+                        "statusBarHeight": statusBarHeight,
         ];
         
         
