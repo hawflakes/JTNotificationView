@@ -20,7 +20,7 @@ class JTNotificationManager {
     }
     
     
-    func show(notification: JTNotificationView,  animated: Bool = true) {
+    func show(_ notification: JTNotificationView,  animated: Bool = true) {
         if (presentedNotification != nil) {
             notificationQueue.append(notification)
         } else {
@@ -31,14 +31,14 @@ class JTNotificationManager {
         
     }
     
-    func dismiss(notification: JTNotificationView, animated: Bool = true) {
+    func dismiss(_ notification: JTNotificationView, animated: Bool = true) {
         //if presenting, tear it down. then present the next one in the queue.
         if notification == presentedNotification {
             let teardownWhenDone = notificationQueue.count == 0
             notificationController.dismiss(notification, animated: animated, teardown: teardownWhenDone)
             presentedNotification = nil
-        } else if let index = notificationQueue.indexOf(notification) {
-            notificationQueue.removeAtIndex(index)
+        } else if let index = notificationQueue.index(of: notification) {
+            notificationQueue.remove(at: index)
             print ("removed notification from queue")
         } else {
             print ("notification not in queue!")
@@ -47,7 +47,7 @@ class JTNotificationManager {
         processNextNotification(animated)
     }
     
-    func dismissAll(animated: Bool = true) {
+    func dismissAll(_ animated: Bool = true) {
         if let notification = presentedNotification {
             notificationController.dismiss(notification, animated: animated, teardown: true)
             presentedNotification = nil
@@ -57,7 +57,7 @@ class JTNotificationManager {
     }
     
     //checks for pending notifications and presents the next one in the queue
-    internal func processNextNotification(animated: Bool) {
+    internal func processNextNotification(_ animated: Bool) {
         if (presentedNotification != nil) {
             // don't do anything
             return
@@ -75,39 +75,39 @@ class JTNotificationManager {
 // This class is only responsible for presenting itself. It is not responsible for dealing with multiple presentations
 internal class NotificationViewController : UIViewController {
     var passThroughView: PassThroughView?
-    let notificationWindow = OverlayWindow(frame: UIScreen.mainScreen().bounds)
+    let notificationWindow = OverlayWindow(frame: UIScreen.main.bounds)
     
     var animationDuration = 0.3
     
     func setupWindow() {
         notificationWindow.windowLevel = UIWindowLevelStatusBar
         notificationWindow.rootViewController = self
-        notificationWindow.hidden = true
+        notificationWindow.isHidden = true
     }
     
     func teardownWindow() {
         notificationWindow.rootViewController = nil
-        notificationWindow.hidden = true
+        notificationWindow.isHidden = true
         //send an update to the parent view controller...
-        if let topRootViewController = UIApplication.sharedApplication().keyWindow?.rootViewController {
+        if let topRootViewController = UIApplication.shared.keyWindow?.rootViewController {
             topRootViewController.setNeedsStatusBarAppearanceUpdate()
         }
     }
     
-    func show(notification:JTNotificationView, animated:Bool) -> Void {
-        self.view.hidden = true //NOTE:(tihon) 2015-11-3 This HAX is here until we use the view itself as the passthrough.
+    func show(_ notification:JTNotificationView, animated:Bool) -> Void {
+        self.view.isHidden = true //NOTE:(tihon) 2015-11-3 This HAX is here until we use the view itself as the passthrough.
         // without hiding the view, you have to dismiss the notification the first time.
         
         if passThroughView == nil {
             // add the pass-through view
-            let passThrough = PassThroughView(frame: UIScreen.mainScreen().bounds)
-            passThrough.hidden = false
-            passThrough.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
+            let passThrough = PassThroughView(frame: UIScreen.main.bounds)
+            passThrough.isHidden = false
+            passThrough.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             
             passThroughView = passThrough
             notificationWindow.addSubview(passThrough)
         }
-        notificationWindow.hidden = false
+        notificationWindow.isHidden = false
         
         //add self to visible errors
         
@@ -123,7 +123,7 @@ internal class NotificationViewController : UIViewController {
         }
         
         if animated {
-            UIView.animateWithDuration(animationDuration, animations:{ () -> Void in
+            UIView.animate(withDuration: animationDuration, animations:{ () -> Void in
                 animationBlock()
                 self.setNeedsStatusBarAppearanceUpdate()
                 },
@@ -135,7 +135,7 @@ internal class NotificationViewController : UIViewController {
     }
     
     
-    func dismiss(notification:JTNotificationView, animated:Bool = true, teardown:Bool = true) {
+    func dismiss(_ notification:JTNotificationView, animated:Bool = true, teardown:Bool = true) {
         // check if presenting it. if so, go through this. otherwise just remove from the queue
         
         print("dismiss")
@@ -146,7 +146,7 @@ internal class NotificationViewController : UIViewController {
             }
         }
         if animated{
-            UIView.animateWithDuration(animationDuration, animations: { () -> Void in
+            UIView.animate(withDuration: animationDuration, animations: { () -> Void in
                 notification.frame.origin.y = -notification.notifHeight
                 }, completion: { (Bool) -> Void in
                     completion()
@@ -157,12 +157,12 @@ internal class NotificationViewController : UIViewController {
     }
 
     class func topViewController() -> UIViewController? {
-        let keyWindow = UIApplication.sharedApplication().keyWindow
+        let keyWindow = UIApplication.shared.keyWindow
         return topViewControllerWithRoot(keyWindow?.rootViewController)
     }
     
     // NOTE: (tihon) 2015-11-2: borrowed from `RaisinToast`
-    class func topViewControllerWithRoot(root:UIViewController?) -> UIViewController? {
+    class func topViewControllerWithRoot(_ root:UIViewController?) -> UIViewController? {
         if let navRoot = root as? UINavigationController {
             return topViewControllerWithRoot(navRoot.visibleViewController)
         } else if let root = root {
@@ -173,30 +173,30 @@ internal class NotificationViewController : UIViewController {
         return root
     }
     
-    override func preferredStatusBarStyle() -> UIStatusBarStyle {
+    override var preferredStatusBarStyle : UIStatusBarStyle {
         //check that we're not showing anything right now
         let presenting = self.view.subviews.contains{ (view) -> Bool in
-            if view.isKindOfClass(JTNotificationView) {
+            if view.isKind(of: JTNotificationView.self) {
                 return true
             }
             return false
         }
         
         if presenting {
-            return .LightContent // we're onscreen, so show our own
+            return .lightContent // we're onscreen, so show our own
         }
         
-        if let topVC = NotificiationViewController.topViewController() {
-            return topVC.preferredStatusBarStyle()
+        if let topVC = NotificationViewController.topViewController() {
+            return topVC.preferredStatusBarStyle
         }
-        return .LightContent
+        return .lightContent
     }
     
-    override func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
-        if let topVC = NotificiationViewController.topViewController() {
-            return topVC.supportedInterfaceOrientations()
+    override var supportedInterfaceOrientations : UIInterfaceOrientationMask {
+        if let topVC = NotificationViewController.topViewController() {
+            return topVC.supportedInterfaceOrientations
         }
-        return super.supportedInterfaceOrientations()
+        return super.supportedInterfaceOrientations
     }
     
 }
@@ -211,7 +211,7 @@ class JTNotificationView : UIView {
     let imageView = UIImageView()
     let label = UILabel()
     let labelTextNumberOfLines = 0
-    let closeButton = UIButton(type: .System)
+    let closeButton = UIButton(type: .system)
     weak var notificationManager: JTNotificationManager? = nil //NOTE:(tihon) 2015-10-29 this must be set if presenting. This should conform to a protocol instead.
    
     var openAction: (()->Void)? = nil
@@ -224,21 +224,21 @@ class JTNotificationView : UIView {
         super.init(coder: aDecoder)
     }
     
-    init(text:String!, icon:UIImage!, openAction:()->Void) {
-        let frame = CGRectMake(0, -notifHeight, UIScreen.mainScreen().bounds.width, notifHeight)
+    init(text:String!, icon:UIImage!, openAction:@escaping ()->Void) {
+        let frame = CGRect(x: 0, y: -notifHeight, width: UIScreen.main.bounds.width, height: notifHeight)
         super.init(frame: frame)
         
         self.translatesAutoresizingMaskIntoConstraints = true
         self.text = text
         
         let closeTitle = "✕"
-        self.closeButton.setTitle(closeTitle, forState: .Normal)
-        self.closeButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
-        self.closeButton.setTitle(closeTitle, forState: .Highlighted)
-        self.closeButton.titleLabel!.font = UIFont.boldSystemFontOfSize(22.0)
+        self.closeButton.setTitle(closeTitle, for: UIControlState())
+        self.closeButton.setTitleColor(UIColor.white, for: UIControlState())
+        self.closeButton.setTitle(closeTitle, for: .highlighted)
+        self.closeButton.titleLabel!.font = UIFont.boldSystemFont(ofSize: 22.0)
         self.closeButton.titleLabel!.sizeToFit()
         self.closeButton.translatesAutoresizingMaskIntoConstraints = false
-        self.closeButton.addTarget(self, action: "dismiss", forControlEvents: .TouchUpInside)
+        self.closeButton.addTarget(self, action: #selector(JTNotificationView.dismiss), for: .touchUpInside)
         
         self.imageView.image = icon
         self.imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -246,8 +246,8 @@ class JTNotificationView : UIView {
       
         self.label.adjustsFontSizeToFitWidth = true
         self.label.numberOfLines = labelTextNumberOfLines
-        self.label.font = UIFont.systemFontOfSize(fontSize)
-        self.label.textColor = UIColor.whiteColor()
+        self.label.font = UIFont.systemFont(ofSize: fontSize)
+        self.label.textColor = UIColor.white
         self.label.text = text
         self.label.sizeToFit()
         self.label.translatesAutoresizingMaskIntoConstraints = false
@@ -259,8 +259,8 @@ class JTNotificationView : UIView {
         self.openAction = openAction
         
         
-        self.userInteractionEnabled = true
-        let tapRecognizer = UITapGestureRecognizer(target: self, action: "runOpenAction")
+        self.isUserInteractionEnabled = true
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(JTNotificationView.runOpenAction))
         self.addGestureRecognizer(tapRecognizer)
         
         backgroundColor = UIColor(white: 0.0, alpha: 0.75)
@@ -288,12 +288,12 @@ class JTNotificationView : UIView {
                         "statusBarHeight": statusBarHeight,
         ]
         
-        self.addConstraint(NSLayoutConstraint(item:closeButton, attribute: .Height, relatedBy: .Equal, toItem: self, attribute: .Height, multiplier: 1.0, constant: 0))
+        self.addConstraint(NSLayoutConstraint(item:closeButton, attribute: .height, relatedBy: .equal, toItem: self, attribute: .height, multiplier: 1.0, constant: 0))
         
-        let vLayout = NSLayoutConstraint.constraintsWithVisualFormat("V:|-statusBarHeight-[textLabel]-vPadding-|", options: .AlignAllCenterX, metrics: metrics, views: views)
+        let vLayout = NSLayoutConstraint.constraints(withVisualFormat: "V:|-statusBarHeight-[textLabel]-vPadding-|", options: .alignAllCenterX, metrics: metrics, views: views)
         self.addConstraints(vLayout)
         
-        let layout = NSLayoutConstraint.constraintsWithVisualFormat("|-(padding)-[icon(iconWidth)]-[textLabel]-[button(closePadding)]-|", options: .AlignAllCenterY, metrics: metrics, views: views)
+        let layout = NSLayoutConstraint.constraints(withVisualFormat: "|-(padding)-[icon(iconWidth)]-[textLabel]-[button(closePadding)]-|", options: .alignAllCenterY, metrics: metrics, views: views)
         self.addConstraints(layout)
         
         super.updateConstraints()
@@ -315,8 +315,8 @@ class JTNotificationView : UIView {
 
 internal class OverlayWindow : UIWindow {
     
-    override func hitTest(point: CGPoint, withEvent event: UIEvent?) -> UIView? {
-        let result = super.hitTest(point, withEvent: event)
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        let result = super.hitTest(point, with: event)
         if let _ = result as? PassThroughView {
             // NOTE(tihon) 2015-10-25: call the manager to dismiss
             print("passthrough view")

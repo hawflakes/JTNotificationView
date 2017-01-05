@@ -14,7 +14,7 @@
 		32F068761BD9A2590072FD4C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 32F068741BD9A2590072FD4C /* LaunchScreen.storyboard */; };
 		32F068811BD9A2590072FD4C /* JTForegroundNotificationDemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F068801BD9A2590072FD4C /* JTForegroundNotificationDemoTests.swift */; };
 		32F0688C1BD9A2590072FD4C /* JTForegroundNotificationDemoUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F0688B1BD9A2590072FD4C /* JTForegroundNotificationDemoUITests.swift */; };
-		32F0689A1BD9EBF30072FD4C /* JTNotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F068991BD9EBF30072FD4C /* JTNotificationView.swift */; settings = {ASSET_TAGS = (); }; };
+		32F0689A1BD9EBF30072FD4C /* JTNotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F068991BD9EBF30072FD4C /* JTNotificationView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -190,18 +190,21 @@
 		32F068601BD9A2580072FD4C /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0700;
+				LastUpgradeCheck = 0820;
 				ORGANIZATIONNAME = "Jack Tihon";
 				TargetAttributes = {
 					32F068671BD9A2580072FD4C = {
 						CreatedOnToolsVersion = 7.0.1;
+						LastSwiftMigration = 0820;
 					};
 					32F0687B1BD9A2590072FD4C = {
 						CreatedOnToolsVersion = 7.0.1;
+						LastSwiftMigration = 0820;
 						TestTargetID = 32F068671BD9A2580072FD4C;
 					};
 					32F068861BD9A2590072FD4C = {
 						CreatedOnToolsVersion = 7.0.1;
+						LastSwiftMigration = 0820;
 						TestTargetID = 32F068671BD9A2580072FD4C;
 					};
 				};
@@ -328,8 +331,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -373,8 +378,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -393,6 +400,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
@@ -406,6 +414,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.prosperworks.JTForegroundNotificationDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -417,6 +426,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.prosperworks.JTForegroundNotificationDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -428,6 +438,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.prosperworks.JTForegroundNotificationDemoTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JTForegroundNotificationDemo.app/JTForegroundNotificationDemo";
 			};
 			name = Debug;
@@ -440,6 +451,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.prosperworks.JTForegroundNotificationDemoTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JTForegroundNotificationDemo.app/JTForegroundNotificationDemo";
 			};
 			name = Release;
@@ -451,6 +463,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.prosperworks.JTForegroundNotificationDemoUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 				TEST_TARGET_NAME = JTForegroundNotificationDemo;
 				USES_XCTRUNNER = YES;
 			};
@@ -463,6 +476,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.prosperworks.JTForegroundNotificationDemoUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 				TEST_TARGET_NAME = JTForegroundNotificationDemo;
 				USES_XCTRUNNER = YES;
 			};
@@ -487,6 +501,7 @@
 				32F068921BD9A2590072FD4C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		32F068931BD9A2590072FD4C /* Build configuration list for PBXNativeTarget "JTForegroundNotificationDemoTests" */ = {
 			isa = XCConfigurationList;
@@ -495,6 +510,7 @@
 				32F068951BD9A2590072FD4C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		32F068961BD9A2590072FD4C /* Build configuration list for PBXNativeTarget "JTForegroundNotificationDemoUITests" */ = {
 			isa = XCConfigurationList;
@@ -503,6 +519,7 @@
 				32F068981BD9A2590072FD4C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -22,28 +22,28 @@ class ViewController: UIViewController {
         
         let titleLabel = button.titleLabel as UILabel!;
         
-        titleLabel.text = "Show Notification";
-        titleLabel.font = UIFont.systemFontOfSize(24.0);
-        titleLabel.textColor = UIColor.blackColor();
+        titleLabel?.text = "Show Notification";
+        titleLabel?.font = UIFont.systemFont(ofSize: 24.0);
+        titleLabel?.textColor = UIColor.black;
         
-        button.frame = CGRectMake(0, 0, 200, 100);
+        button.frame = CGRect(x: 0, y: 0, width: 200, height: 100);
         
         
-        button.addTarget(self, action: "presentNotification", forControlEvents: .TouchUpInside);
+        button.addTarget(self, action: #selector(ViewController.presentNotification), for: .touchUpInside);
     }
    
-    override func preferredStatusBarStyle() -> UIStatusBarStyle {
-        return .Default;
+    override var preferredStatusBarStyle : UIStatusBarStyle {
+        return .default;
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         notificationManager.setupWindow();
         self.view.addSubview(button);
-        self.view.backgroundColor = UIColor.blueColor();
+        self.view.backgroundColor = UIColor.blue;
  
-        button.backgroundColor = UIColor.grayColor();
-        button.setTitle("Show Notification", forState: .Normal);
-        button.setTitleColor(UIColor.blackColor(), forState: .Highlighted);
+        button.backgroundColor = UIColor.gray;
+        button.setTitle("Show Notification", for: UIControlState());
+        button.setTitleColor(UIColor.black, for: .highlighted);
        
         let metrics = ["spacing": 20.0,
                         "buttonHeight": 40.0,
@@ -61,10 +61,10 @@ class ViewController: UIViewController {
                     "spacer2": spacer2];
         
         
-        let verticalLayout = NSLayoutConstraint.constraintsWithVisualFormat("V:|-[spacer]-[button(buttonHeight)]-[spacer2(==spacer)]-|", options: .AlignAllLeft, metrics: metrics, views: views);
+        let verticalLayout = NSLayoutConstraint.constraints(withVisualFormat: "V:|-[spacer]-[button(buttonHeight)]-[spacer2(==spacer)]-|", options: .alignAllLeft, metrics: metrics, views: views);
         self.view.addConstraints(verticalLayout);
         
-        let hLayout = NSLayoutConstraint.constraintsWithVisualFormat("|-hPadding-[button]-hPadding-|", options: .AlignAllCenterX, metrics: metrics, views: views);
+        let hLayout = NSLayoutConstraint.constraints(withVisualFormat: "|-hPadding-[button]-hPadding-|", options: .alignAllCenterX, metrics: metrics, views: views);
         self.view.addConstraints(hLayout);
         
     }
@@ -78,30 +78,31 @@ class ViewController: UIViewController {
     func presentNotification() {
 
         print("present notifcation");
-        let image = ViewController.imageFromText("🐼",font:UIFont.systemFontOfSize(60), maxWidth: 40.0, color: UIColor.blueColor());
-        let notif = JTNotificationView(text: "Steve Holm Assigned the lead Brian Crushing to you.\(count++)", icon:image) {
+        let image = ViewController.imageFromText("🐼",font:UIFont.systemFont(ofSize: 60), maxWidth: 40.0, color: UIColor.blue);
+        let notif = JTNotificationView(text: "Steve Holm Assigned the lead Brian Crushing to you.\(count)", icon:image) {
             print("done.");
+            self.count+=1
         };
         notificationManager.show(notif, animated: true);
     }
    
-    class func sizeOfAttributeString(str: NSAttributedString, maxWidth: CGFloat) -> CGSize {
-        let size = str.boundingRectWithSize(CGSizeMake(maxWidth, 1000), options:(NSStringDrawingOptions.UsesLineFragmentOrigin), context:nil).size
+    class func sizeOfAttributeString(_ str: NSAttributedString, maxWidth: CGFloat) -> CGSize {
+        let size = str.boundingRect(with: CGSize(width: maxWidth, height: 1000), options:(NSStringDrawingOptions.usesLineFragmentOrigin), context:nil).size
         return size
     }
     
-    class func imageFromText(text:String, font:UIFont, maxWidth:CGFloat, color:UIColor) -> UIImage {
+    class func imageFromText(_ text:String, font:UIFont, maxWidth:CGFloat, color:UIColor) -> UIImage {
         let paragraph = NSMutableParagraphStyle()
-        paragraph.lineBreakMode = NSLineBreakMode.ByWordWrapping
-        paragraph.alignment = .Center // potentially this can be an input param too, but i guess in most use cases we want center align
+        paragraph.lineBreakMode = NSLineBreakMode.byWordWrapping
+        paragraph.alignment = .center // potentially this can be an input param too, but i guess in most use cases we want center align
         
         let attributedString = NSAttributedString(string: text, attributes: [NSFontAttributeName: font, NSForegroundColorAttributeName: color, NSParagraphStyleAttributeName:paragraph])
         
         let size = sizeOfAttributeString(attributedString, maxWidth: maxWidth)
         UIGraphicsBeginImageContextWithOptions(size, false , 0.0)
-        attributedString.drawInRect(CGRectMake(0, 0, size.width, size.height))
+        attributedString.draw(in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        return image
+        return image!
     }
 }
