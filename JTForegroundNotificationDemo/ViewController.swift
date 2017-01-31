@@ -79,9 +79,9 @@ class ViewController: UIViewController {
 
         print("present notifcation");
         let image = ViewController.imageFromText("🐼",font:UIFont.systemFont(ofSize: 60), maxWidth: 40.0, color: UIColor.blue);
-        let notif = JTNotificationView(text: "Steve Holm Assigned the lead Brian Crushing to you.\(count)", icon:image) {
+        let notif = JTNotificationView(text: "Steve Holm Assigned the lead Brian Crushing to you. \(count)", icon:image) {
             print("done.");
-            self.count+=1
+            self.count += 1
         };
         notificationManager.show(notif, animated: true);
     }

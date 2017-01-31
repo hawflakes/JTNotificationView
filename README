@@ -1,0 +1,5 @@
+WHAT IS THIS?
+- this is simple self-contained UI component to display notification text with a large icon
+- there is a demo app that demonstrates its usage
+- tapping on the "X" dismisses the action
+- tapping on the body runs the `doneAction` block
